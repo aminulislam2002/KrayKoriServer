@@ -186,7 +186,7 @@ async function run() {
         const updateProductInfo = req.body;
 
         // Extract the fields that need to be updated
-        const { name, description, category, productType, sizes, colors, originalPrice, offerPrice, ratings, reviews } =
+        const { name, description, category, subCategory, productType, sizes, colors, originalPrice, offerPrice, ratings, reviews } =
           updateProductInfo;
 
         // Create an object to store only the fields that need to be updated
@@ -194,6 +194,7 @@ async function run() {
         if (name) updateFields.name = name;
         if (description) updateFields.description = description;
         if (category) updateFields.category = category;
+        if (subCategory) updateFields.subCategory = subCategory;
         if (productType) updateFields.productType = productType;
         if (sizes) updateFields.sizes = sizes;
         if (colors) updateFields.colors = colors;
