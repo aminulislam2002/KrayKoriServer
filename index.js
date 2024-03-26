@@ -47,6 +47,7 @@ async function run() {
     const productsCollection = database.collection("products");
     const ordersCollection = database.collection("orders");
     const usersCollection = database.collection("users");
+    const cartsCollection = database.collection("carts");
 
     app.get("/", (req, res) => {
       res.send("Hello World!");
@@ -127,10 +128,33 @@ async function run() {
       }
     });
 
+    // GET cart products by email
+    app.get("/cartProducts", async (req, res) => {
+      try {
+        const email = req.query.email;
+        console.log(email);
+        const query = { customerEmail: email };
+        const userCartProducts = await cartsCollection.find(query).toArray();
+        res.send(userCartProducts);
+      } catch (error) {
+        console.error("Error fetching user orders:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+      }
+    });
+
     // POST a product
     app.post("/postProduct", async (req, res) => {
       const product = req.body;
       const result = await productsCollection.insertOne(product);
+      res.send(result);
+    });
+
+    // POST a product to cart
+    app.post("/postCartProduct", async (req, res) => {
+      const product = req.body;
+      console.log(product);
+      const result = await cartsCollection.insertOne(product);
+      console.log(result);
       res.send(result);
     });
 
@@ -193,6 +217,9 @@ async function run() {
           updateFields.sizes = updateProductInfo.sizes;
         }
 
+        // Remove createdAt field from updateFields to prevent it from being updated
+        updateFields.createdAt = new Date().toISOString();
+
         const updateDoc = {
           $set: updateFields,
         };
@@ -229,11 +256,19 @@ async function run() {
       }
     });
 
-    // DELETE a product
+    // DELETE a product from productsCollection
     app.delete("/deleteProduct/:id", async (req, res) => {
       const productId = req.params.id;
       const query = { _id: new ObjectId(productId) };
       const result = await productsCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // DELETE a product from cartsCollection
+    app.delete("/deleteProductFromCart/:id", async (req, res) => {
+      const productId = req.params.id;
+      const query = { _id: new ObjectId(productId) };
+      const result = await cartsCollection.deleteOne(query);
       res.send(result);
     });
 
